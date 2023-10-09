@@ -37,12 +37,7 @@ function initialPrompt() {
    return word;
 };
 
-
-
-let simpleScorer = {
-   'name' : 'Simple Score',
-   'description' : 'Each letter is worth 1 point.',
-   scoringFunction : function(word){
+let simpleScorer = function (word){
    let score = 0;
    //let scoreOutput = '';
    for (let i=0; i < word.length; i++){
@@ -51,12 +46,15 @@ let simpleScorer = {
    //scoreOutput = `${word} is worth ${score} points in simple score`;
    return Number(score);
    }
+
+let simpleScore = {
+   'name' : 'Simple Score',
+   'description' : 'Each letter is worth 1 point.',
+   scorerFunction : simpleScorer
+   
 };
 
-let vowelBonusScorer = {
-   'name' : 'Bonus Vowels',
-   'description' : 'Vowels are worth 3 pts, consonants are 1pt.',
-   scoringFunction : function(word){
+let vowelBonusScorer = function (word){
    word = word.toUpperCase().split('');
    let arrVowels = ['A','E','I','O','U','Y'];
    let score = 0;
@@ -65,31 +63,39 @@ let vowelBonusScorer = {
    }
    return Number(score);
    }
+
+let vowelBonusScore = {
+   'name' : 'Bonus Vowels',
+   'description' : 'Vowels are worth 3 pts, consonants are 1pt.',
+   scorerFunction : vowelBonusScorer
+   
 };
 
-let scrabbleScorer = {
+let scrabbleScorer = function (word) { //create function
+   word = word.toUpperCase().split('');  //assures case, splits into array
+   let score = 0; //mutable variable to output points as loop crawls
+ 
+   for (let i = 0; i < word.length; i++) { //iterative loop crawling word
+ 
+     for (const pointValue in oldPointStructure) { //iterative loop crawling score object keys
+ 
+       if (oldPointStructure[pointValue].includes(word[i])) {
+         score += Number(`${pointValue}`);
+       }
+ 
+     }
+   }
+   return score;
+ }
+
+let scrabbleScore = {
    'name' : 'Scrabble',
    'description' : 'The traditional scoring algorithm',
-   scoringFunction : function(word) { //create function
-      word = word.toUpperCase().split('');  //assures case, splits into array
-      let score = 0; //mutable variable to output points as loop crawls
-    
-      for (let i = 0; i < word.length; i++) { //iterative loop crawling word
-    
-        for (const pointValue in oldPointStructure) { //iterative loop crawling score object keys
-    
-          if (oldPointStructure[pointValue].includes(word[i])) {
-            score += Number(`${pointValue}`);
-          }
-    
-        }
-      }
-      return score;
-    }
+   scorerFunction : scrabbleScorer
 
 };
 
-const scoringAlgorithms = [simpleScorer, vowelBonusScorer, scrabbleScorer];
+const scoringAlgorithms = [simpleScore, vowelBonusScore, scrabbleScore];
 
 function scorerPrompt() {
    let scoreChoice = input.question(`
@@ -100,12 +106,19 @@ function scorerPrompt() {
    return scoringAlgorithms[scoreChoice];
 }
 
-function transform(oldScore) {
-   let newScore = {}; //copy being returned later
-   return newScore;
+function transform(oldScoreKey) {
+   let newScoreKey = {}; //copy to be returned
+   for (var item in oldScoreKey){   //for every key in oldKey, 
+     for (let i=0; i<oldScoreKey[item].length; i++){  //then for every value in that key (item)
+       let letter = oldScoreKey[item][i];  //assign indexed value to letter
+       newScoreKey[`${letter.toLowerCase()}`] = Number(item);  //make new Key(letter):Value(old Item) property, assure type
+     }
+   }
+   // newScoreKey[' '] = 0;
+   return newScoreKey
 };
 
-let newPointStructure;
+let newPointStructure = transform(oldPointStructure);
 
 function runProgram() {
    let userWord = initialPrompt();
