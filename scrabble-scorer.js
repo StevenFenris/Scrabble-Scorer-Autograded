@@ -123,7 +123,7 @@ let newPointStructure = transform(oldPointStructure);
 function runProgram() {
    let userWord = initialPrompt();
    let scoreChoice = scorerPrompt();
-   console.log(`the Score for ${userWord} is ${scoreChoice.scoringFunction(userWord)}!`);
+   console.log(`the Score for ${userWord} is ${scoreChoice.scorerFunction(userWord)}!`);
    
 }
 
